@@ -1,0 +1,861 @@
+Index: .idea/AndroidProjectSystem.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/AndroidProjectSystem.xml b/.idea/AndroidProjectSystem.xml
+new file mode 100644
+--- /dev/null	(date 1745166640676)
++++ b/.idea/AndroidProjectSystem.xml	(date 1745166640676)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="AndroidProjectSystem">
++    <option name="providerId" value="com.android.tools.idea.GradleProjectSystem" />
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/kotlinc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/kotlinc.xml b/.idea/kotlinc.xml
+new file mode 100644
+--- /dev/null	(date 1745166640677)
++++ b/.idea/kotlinc.xml	(date 1745166640677)
+@@ -0,0 +1,6 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="KotlinJpsPluginSettings">
++    <option name="version" value="2.0.21" />
++  </component>
++</project>
+\ No newline at end of file
+Index: JardinInteligente/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt b/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt
+--- a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt	(date 1745166640683)
+@@ -1,15 +1,9 @@
+-package com.azrael.jardininteligente.ui
++package com.azrael.jardininteligente
+ 
+ import android.content.Context
+ import android.widget.Toast
+-import androidx.activity.ComponentActivity
+ import androidx.compose.foundation.clickable
+-import androidx.compose.foundation.layout.Box
+-import androidx.compose.foundation.layout.Column
+-import androidx.compose.foundation.layout.fillMaxSize
+-import androidx.compose.foundation.layout.fillMaxWidth
+-import androidx.compose.foundation.layout.height
+-import androidx.compose.foundation.layout.padding
++import androidx.compose.foundation.layout.*
+ import androidx.compose.foundation.lazy.LazyColumn
+ import androidx.compose.foundation.lazy.items
+ import androidx.compose.material.icons.Icons
+@@ -17,46 +11,27 @@
+ import androidx.compose.material.icons.filled.Forum
+ import androidx.compose.material.icons.filled.Home
+ import androidx.compose.material.icons.filled.Menu
+-import androidx.compose.material3.CircularProgressIndicator
+-import androidx.compose.material3.Divider
+-import androidx.compose.material3.DrawerValue
+-import androidx.compose.material3.ExperimentalMaterial3Api
+-import androidx.compose.material3.Icon
+-import androidx.compose.material3.MaterialTheme
+-import androidx.compose.material3.ModalNavigationDrawer
+-import androidx.compose.material3.NavigationDrawerItem
+-import androidx.compose.material3.NavigationDrawerItemDefaults
+-import androidx.compose.material3.Scaffold
+-import androidx.compose.material3.Text
+-import androidx.compose.material3.TopAppBar
+-import androidx.compose.material3.rememberDrawerState
+-import androidx.compose.runtime.Composable
+-import androidx.compose.runtime.LaunchedEffect
+-import androidx.compose.runtime.getValue
+-import androidx.compose.runtime.mutableStateOf
+-import androidx.compose.runtime.remember
+-import androidx.compose.runtime.rememberCoroutineScope
+-import androidx.compose.runtime.setValue
++import androidx.compose.material3.*
++import androidx.compose.runtime.*
+ import androidx.compose.ui.Alignment
+ import androidx.compose.ui.Modifier
++import androidx.compose.ui.graphics.Color
+ import androidx.compose.ui.graphics.vector.ImageVector
+ import androidx.compose.ui.platform.LocalContext
+ import androidx.compose.ui.unit.dp
+ import androidx.navigation.NavHostController
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+-import androidx.navigation.compose.currentBackStackEntryAsState
+ import androidx.navigation.compose.rememberNavController
+-import com.azrael.jardininteligente.ForumScreen
+-import com.azrael.jardininteligente.PlantIdentificationScreen
+ import com.azrael.jardininteligente.api.ApiClient
++import com.azrael.jardininteligente.api.ApiService.UserResponse
+ import com.azrael.jardininteligente.api.models.Plant
++import com.azrael.jardininteligente.api.models.UserResponse
+ import kotlinx.coroutines.launch
+ import retrofit2.Call
+ import retrofit2.Callback
+ import retrofit2.Response
+ 
+-// Sealed class para definir los items del menú del drawer.
+ sealed class DrawerMenuItem(val route: String, val title: String, val icon: ImageVector) {
+     object Inicio : DrawerMenuItem("inicio", "Inicio", Icons.Filled.Home)
+     object Identificar : DrawerMenuItem("identificar", "Identificar", Icons.Filled.CameraAlt)
+@@ -66,16 +41,23 @@
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
+ fun HomeScreen() {
+-    val navController = rememberNavController() // ✅ Aquí se crea correctamente
+-    val context = LocalContext.current
++    val navController = rememberNavController()
+     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+     val coroutineScope = rememberCoroutineScope()
+ 
+     ModalNavigationDrawer(
+         drawerState = drawerState,
++        scrimColor = Color.Transparent,
+         drawerContent = {
+-            DrawerContent(navController = navController) {
+-                coroutineScope.launch { drawerState.close() }
++            Surface(
++                modifier = Modifier
++                    .fillMaxHeight()
++                    .fillMaxWidth(0.75f),
++                color = Color(0xFFF0F0F0)
++            ) {
++                DrawerContent(navController = navController) {
++                    coroutineScope.launch { drawerState.close() }
++                }
+             }
+         }
+     ) {
+@@ -85,7 +67,7 @@
+                     title = { Text("Jardín Inteligente") },
+                     navigationIcon = {
+                         Icon(
+-                            imageVector = Icons.Default.Menu,
++                            imageVector = Icons.Filled.Menu,
+                             contentDescription = "Menú",
+                             modifier = Modifier
+                                 .padding(16.dp)
+@@ -97,18 +79,17 @@
+             content = { innerPadding ->
+                 NavHost(
+                     navController = navController,
+-                    startDestination = "inicio",
++                    startDestination = DrawerMenuItem.Inicio.route,
+                     modifier = Modifier.padding(innerPadding)
+                 ) {
+-                    composable("inicio") { MainScreenContent(navController) }
+-                    composable("identificar") { PlantIdentificationScreen(navController) }
+-                    composable("foro") { ForumScreen(navController) }
++                    composable(DrawerMenuItem.Inicio.route) { MainScreenContent(navController) }
++                    composable(DrawerMenuItem.Identificar.route) { PlantIdentificationScreen(navController) }
++                    composable(DrawerMenuItem.Foro.route) { ForumScreen(navController) }
+                 }
+             }
+         )
+     }
+ }
+-
+ 
+ @Composable
+ fun DrawerContent(navController: NavHostController, onItemSelected: () -> Unit) {
+@@ -117,8 +98,44 @@
+         DrawerMenuItem.Identificar,
+         DrawerMenuItem.Foro
+     )
+-    Column(modifier = Modifier.fillMaxSize()) {
+-        menuItems.forEach { item ->
++
++    val context = LocalContext.current
++    var correo by remember { mutableStateOf("") }
++
++    // Cargar el nombre del usuario desde la API
++    LaunchedEffect(Unit) {
++        val prefs = context.getSharedPreferences("JardinInteligentePrefs", Context.MODE_PRIVATE)
++        val token = prefs.getString("token", null)
++        if (!token.isNullOrEmpty()) {
++            val authHeader = "Bearer $token"
++            ApiClient.apiService.getUserInfo(authHeader).enqueue(object : Callback<UserResponse> {
++                override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
++                    if (response.isSuccessful) {
++                        correo = response.body()?.correo ?: ""
++                    }
++                }
++
++                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
++                    // Puedes manejar el error si quieres
++                }
++            })
++        }
++    }
++
++    Column(
++        modifier = Modifier
++            .fillMaxSize()
++            .padding(24.dp),
++        verticalArrangement = Arrangement.Center,
++        horizontalAlignment = Alignment.Start
++    ) {
++        Text(
++            text = if (correo.isNotEmpty()) "¡Bienvenido, $correo!" else "¡Bienvenido!",
++            style = MaterialTheme.typography.titleLarge,
++            modifier = Modifier.padding(bottom = 32.dp)
++        )
++
++        menuItems.forEachIndexed { index, item ->
+             DrawerItem(item = item) {
+                 navController.navigate(item.route) {
+                     popUpTo(navController.graph.startDestinationId) { saveState = true }
+@@ -127,6 +144,10 @@
+                 }
+                 onItemSelected()
+             }
++
++            if (index != menuItems.lastIndex) {
++                Spacer(modifier = Modifier.height(16.dp))
++            }
+         }
+     }
+ }
+@@ -135,10 +156,12 @@
+ fun DrawerItem(item: DrawerMenuItem, onClick: () -> Unit) {
+     NavigationDrawerItem(
+         icon = { Icon(item.icon, contentDescription = item.title) },
+-        label = { Text(item.title) },
++        label = { Text(text = item.title, style = MaterialTheme.typography.titleMedium) },
+         selected = false,
+         onClick = onClick,
+-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
++        modifier = Modifier
++            .fillMaxWidth()
++            .padding(NavigationDrawerItemDefaults.ItemPadding)
+     )
+ }
+ 
+@@ -166,6 +189,7 @@
+                         Toast.makeText(context, "Error al cargar plantas", Toast.LENGTH_SHORT).show()
+                     }
+                 }
++
+                 override fun onFailure(call: Call<List<Plant>>, t: Throwable) {
+                     loading = false
+                     Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+@@ -176,20 +200,16 @@
+ 
+     Box(modifier = Modifier.fillMaxSize()) {
+         when {
+-            loading -> {
+-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+-            }
+-            plantList.isEmpty() -> {
+-                Text(
+-                    text = "No hay plantas registradas",
+-                    modifier = Modifier.align(Alignment.Center),
+-                    style = MaterialTheme.typography.bodyMedium
+-                )
+-            }
++            loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
++            plantList.isEmpty() -> Text(
++                text = "No hay plantas registradas",
++                modifier = Modifier.align(Alignment.Center),
++                style = MaterialTheme.typography.bodyMedium
++            )
+             else -> {
+                 LazyColumn(
+                     modifier = Modifier.fillMaxSize(),
+-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
++                    contentPadding = PaddingValues(16.dp)
+                 ) {
+                     items(plantList) { plant ->
+                         PlantItem(plant = plant)
+@@ -209,7 +229,7 @@
+             .padding(8.dp)
+     ) {
+         Text(text = plant.nombre, style = MaterialTheme.typography.titleMedium)
+-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
++        Spacer(modifier = Modifier.height(4.dp))
+         Text(text = plant.descripcion, style = MaterialTheme.typography.bodyMedium)
+     }
+ }
+Index: JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt b/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt
+--- a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt	(date 1745166640685)
+@@ -33,4 +33,12 @@
+         @Header("Authorization") token: String,
+         @Body request: NewForumTopicRequest
+     ): Call<ApiResponse>
++
++    @GET("me")
++    fun getUserInfo(
++        @Header("Authorization") token: String
++    ): Call<UserResponse>
++
++    data class UserResponse(val correo: String)
++
+ }
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	(date 1745166640675)
++++ b/.idea/.gitignore	(date 1745166640675)
+@@ -0,0 +1,3 @@
++# Default ignored files
++/shelf/
++/workspace.xml
+Index: .idea/gradle.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/gradle.xml b/.idea/gradle.xml
+new file mode 100644
+--- /dev/null	(date 1745166675715)
++++ b/.idea/gradle.xml	(date 1745166675715)
+@@ -0,0 +1,19 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="GradleMigrationSettings" migrationVersion="1" />
++  <component name="GradleSettings">
++    <option name="linkedExternalProjectsSettings">
++      <GradleProjectSettings>
++        <option name="testRunner" value="CHOOSE_PER_TEST" />
++        <option name="externalProjectPath" value="$PROJECT_DIR$" />
++        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
++        <option name="modules">
++          <set>
++            <option value="$PROJECT_DIR$" />
++            <option value="$PROJECT_DIR$/app" />
++          </set>
++        </option>
++      </GradleProjectSettings>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"NONE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"93b5ac4d-7fc6-4e1c-8a78-1fb8d5829826\" name=\"Changes\" comment=\"\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"ClangdSettings\">\r\n    <option name=\"formatViaClangd\" value=\"false\" />\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"ProjectColorInfo\"><![CDATA[{\r\n  \"associatedIndex\": 4\r\n}]]></component>\r\n  <component name=\"ProjectId\" id=\"2vzOB6JU5VzaRtCaLMfPYDYwnTj\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"RunOnceActivity.cidr.known.project.marker\": \"true\",\r\n    \"RunOnceActivity.git.unshallow\": \"true\",\r\n    \"RunOnceActivity.readMode.enableVisualFormatting\": \"true\",\r\n    \"cf.first.check.clang-format\": \"false\",\r\n    \"cidr.known.project.marker\": \"true\",\r\n    \"git-widget-placeholder\": \"main\"\r\n  }\r\n}]]></component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"93b5ac4d-7fc6-4e1c-8a78-1fb8d5829826\" name=\"Changes\" comment=\"\" />\r\n      <created>1745144298549</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1745144298549</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/.idea/workspace.xml	(date 1745166699660)
+@@ -4,7 +4,77 @@
+     <option name="autoReloadType" value="NONE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="93b5ac4d-7fc6-4e1c-8a78-1fb8d5829826" name="Changes" comment="" />
++    <list default="true" id="93b5ac4d-7fc6-4e1c-8a78-1fb8d5829826" name="Changes" comment="">
++      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/AndroidProjectSystem.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/appInsightsSettings.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/deploymentTargetSelector.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/kotlinc.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/migrations.xml" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/.idea/runConfigurations.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/app/.gitignore" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/proguard-rules.pro" beforeDir="false" afterPath="$PROJECT_DIR$/app/proguard-rules.pro" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/AndroidManifest.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/HomeScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/MainActivity.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/ApiService.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/drawable/ic_forum.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_forum.png" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/drawable/ic_launcher_background.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/drawable/ic_launcher_foreground.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_launcher_foreground.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/drawable/ic_water.png" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/drawable/ic_water.png" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-hdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-mdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/values/colors.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/colors.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/values/strings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/strings.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/values/themes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/values/themes.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/xml/backup_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/backup_rules.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/main/res/xml/data_extraction_rules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradle/wrapper/gradle-wrapper.jar" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradlew" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/gradlew.bat" beforeDir="false" afterPath="$PROJECT_DIR$/gradlew.bat" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/JardinInteligente/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
++    </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+@@ -12,13 +82,18 @@
+   </component>
+   <component name="ClangdSettings">
+     <option name="formatViaClangd" value="false" />
++  </component>
++  <component name="ExternalProjectsData">
++    <projectState path="$PROJECT_DIR$">
++      <ProjectState />
++    </projectState>
+   </component>
+   <component name="Git.Settings">
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
+-  <component name="ProjectColorInfo"><![CDATA[{
+-  "associatedIndex": 4
+-}]]></component>
++  <component name="ProjectColorInfo">{
++  &quot;associatedIndex&quot;: 4
++}</component>
+   <component name="ProjectId" id="2vzOB6JU5VzaRtCaLMfPYDYwnTj" />
+   <component name="ProjectViewState">
+     <option name="hideEmptyMiddlePackages" value="true" />
+@@ -32,9 +107,83 @@
+     "RunOnceActivity.readMode.enableVisualFormatting": "true",
+     "cf.first.check.clang-format": "false",
+     "cidr.known.project.marker": "true",
+-    "git-widget-placeholder": "main"
++    "git-widget-placeholder": "Merging main"
+   }
+ }]]></component>
++  <component name="RunManager">
++    <configuration name="Jardin_Inteligente.app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
++      <module name="Jardin_Inteligente.app" />
++      <option name="ANDROID_RUN_CONFIGURATION_SCHEMA_VERSION" value="1" />
++      <option name="DEPLOY" value="true" />
++      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
++      <option name="DEPLOY_AS_INSTANT" value="false" />
++      <option name="ARTIFACT_NAME" value="" />
++      <option name="PM_INSTALL_OPTIONS" value="" />
++      <option name="ALL_USERS" value="false" />
++      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
++      <option name="ALLOW_ASSUME_VERIFIED" value="false" />
++      <option name="CLEAR_APP_STORAGE" value="false" />
++      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
++      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
++      <option name="MODE" value="default_activity" />
++      <option name="RESTORE_ENABLED" value="false" />
++      <option name="RESTORE_FILE" value="" />
++      <option name="RESTORE_FRESH_INSTALL_ONLY" value="false" />
++      <option name="CLEAR_LOGCAT" value="false" />
++      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
++      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
++      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
++      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
++      <option name="DEBUGGER_TYPE" value="Auto" />
++      <Auto>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Auto>
++      <Hybrid>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Hybrid>
++      <Java>
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Java>
++      <Native>
++        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
++        <option name="SHOW_STATIC_VARS" value="true" />
++        <option name="WORKING_DIR" value="" />
++        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
++        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
++        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
++        <option name="DEBUG_SANDBOX_SDK" value="false" />
++      </Native>
++      <Profilers>
++        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
++        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Java/Kotlin Method Sample (legacy)" />
++        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
++        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
++      </Profilers>
++      <option name="DEEP_LINK" value="" />
++      <option name="ACTIVITY" value="" />
++      <option name="ACTIVITY_CLASS" value="" />
++      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
++      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
++      <method v="2">
++        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
++      </method>
++    </configuration>
++  </component>
+   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+   <component name="TaskManager">
+     <task active="true" id="Default" summary="Default task">
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectRootManager\">\r\n    <output url=\"file://$PROJECT_DIR$/out\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/.idea/misc.xml	(date 1745166672930)
+@@ -1,6 +1,4 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager">
+-    <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectModuleManager\">\r\n    <modules>\r\n      <module fileurl=\"file://$PROJECT_DIR$/.idea/Jardin-Inteligente.iml\" filepath=\"$PROJECT_DIR$/.idea/Jardin-Inteligente.iml\" />\r\n    </modules>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+--- a/.idea/modules.xml	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/.idea/modules.xml	(date 1745166699478)
+@@ -2,7 +2,11 @@
+ <project version="4">
+   <component name="ProjectModuleManager">
+     <modules>
+-      <module fileurl="file://$PROJECT_DIR$/.idea/Jardin-Inteligente.iml" filepath="$PROJECT_DIR$/.idea/Jardin-Inteligente.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Jardin_Inteligente.iml" filepath="$PROJECT_DIR$/.idea/modules/Jardin_Inteligente.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.androidTest.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.main.iml" />
++      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Jardin_Inteligente.app.unitTest.iml" />
+     </modules>
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/appInsightsSettings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/appInsightsSettings.xml b/.idea/appInsightsSettings.xml
+new file mode 100644
+--- /dev/null	(date 1745166640676)
++++ b/.idea/appInsightsSettings.xml	(date 1745166640676)
+@@ -0,0 +1,40 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="AppInsightsSettings">
++    <option name="tabSettings">
++      <map>
++        <entry key="Android Vitals">
++          <value>
++            <InsightsFilterSettings>
++              <option name="connection">
++                <ConnectionSetting>
++                  <option name="appId" value="com.azrael.trivialgame" />
++                </ConnectionSetting>
++              </option>
++              <option name="signal" value="SIGNAL_UNSPECIFIED" />
++              <option name="timeIntervalDays" value="SEVEN_DAYS" />
++              <option name="visibilityType" value="ALL" />
++            </InsightsFilterSettings>
++          </value>
++        </entry>
++        <entry key="Firebase Crashlytics">
++          <value>
++            <InsightsFilterSettings>
++              <option name="connection">
++                <ConnectionSetting>
++                  <option name="appId" value="PLACEHOLDER" />
++                  <option name="mobileSdkAppId" value="" />
++                  <option name="projectId" value="" />
++                  <option name="projectNumber" value="" />
++                </ConnectionSetting>
++              </option>
++              <option name="signal" value="SIGNAL_UNSPECIFIED" />
++              <option name="timeIntervalDays" value="THIRTY_DAYS" />
++              <option name="visibilityType" value="ALL" />
++            </InsightsFilterSettings>
++          </value>
++        </entry>
++      </map>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/runConfigurations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/runConfigurations.xml b/.idea/runConfigurations.xml
+new file mode 100644
+--- /dev/null	(date 1745166640679)
++++ b/.idea/runConfigurations.xml	(date 1745166640679)
+@@ -0,0 +1,17 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="RunConfigurationProducerService">
++    <option name="ignoredProducers">
++      <set>
++        <option value="com.intellij.execution.junit.AbstractAllInDirectoryConfigurationProducer" />
++        <option value="com.intellij.execution.junit.AllInPackageConfigurationProducer" />
++        <option value="com.intellij.execution.junit.PatternConfigurationProducer" />
++        <option value="com.intellij.execution.junit.TestInClassConfigurationProducer" />
++        <option value="com.intellij.execution.junit.UniqueIdConfigurationProducer" />
++        <option value="com.intellij.execution.junit.testDiscovery.JUnitTestDiscoveryConfigurationProducer" />
++        <option value="org.jetbrains.kotlin.idea.junit.KotlinJUnitRunConfigurationProducer" />
++        <option value="org.jetbrains.kotlin.idea.junit.KotlinPatternConfigurationProducer" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: JardinInteligente/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt b/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt
+rename to app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt
+--- a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt	(revision 530eadb4f959ab04cb80d4c550cfbddcb53e309e)
++++ b/app/src/main/java/com/azrael/jardininteligente/JardinInteligenteApp.kt	(date 1745166640683)
+@@ -5,6 +5,7 @@
+ import androidx.navigation.compose.NavHost
+ import androidx.navigation.compose.composable
+ import androidx.navigation.compose.rememberNavController
++import com.azrael.jardininteligente.HomeScreen
+ import com.azrael.jardininteligente.LoginScreen
+ import com.azrael.jardininteligente.RegisterScreen
+ 
+Index: .idea/migrations.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/migrations.xml b/.idea/migrations.xml
+new file mode 100644
+--- /dev/null	(date 1745166640677)
++++ b/.idea/migrations.xml	(date 1745166640677)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectMigrations">
++    <option name="MigrateToGradleLocalJavaHome">
++      <set>
++        <option value="$PROJECT_DIR$" />
++      </set>
++    </option>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+new file mode 100644
+--- /dev/null	(date 1745166640676)
++++ b/.idea/deploymentTargetSelector.xml	(date 1745166640676)
+@@ -0,0 +1,10 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="deploymentTargetSelector">
++    <selectionStates>
++      <SelectionState runConfigName="Jardin_Inteligente.app">
++        <option name="selectionMode" value="DROPDOWN" />
++      </SelectionState>
++    </selectionStates>
++  </component>
++</project>
+\ No newline at end of file
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt b/app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/LoginScreen.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt b/app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/RegisterScreen.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt b/app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/PlantIdentificationScreen.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt b/app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/NewTopicScreen.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt b/app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt
+rename to app/src/main/java/com/azrael/jardininteligente/ForumScreen.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/ApiResponse.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/RegisterRequest.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt b/app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt
+rename to app/src/main/java/com/azrael/jardininteligente/ui/theme/Color.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt b/app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt
+rename to app/src/main/java/com/azrael/jardininteligente/ui/theme/Type.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt b/app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt
+rename to app/src/main/java/com/azrael/jardininteligente/ui/theme/Theme.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt b/app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/ApiClient.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/LoginResponse.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/Plant.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierRequest.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt b/app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt
+rename to app/src/main/java/com/azrael/jardininteligente/workers/WateringReminderWorker.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/ForumTopic.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/PlantIdentifierResponse.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/LoginRequest.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt b/app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt
+rename to app/src/main/java/com/azrael/jardininteligente/api/models/NewForumTopicRequest.kt
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt b/app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt
+rename to app/src/main/java/com/azrael/jardininteligente/workers/ForumNewPostWorker.kt
+diff --git a/JardinInteligente/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
+rename from JardinInteligente/gradle/wrapper/gradle-wrapper.properties
+rename to gradle/wrapper/gradle-wrapper.properties
+diff --git a/JardinInteligente/settings.gradle.kts b/settings.gradle.kts
+rename from JardinInteligente/settings.gradle.kts
+rename to settings.gradle.kts
+diff --git a/JardinInteligente/gradle.properties b/gradle.properties
+rename from JardinInteligente/gradle.properties
+rename to gradle.properties
+diff --git a/JardinInteligente/gradle/libs.versions.toml b/gradle/libs.versions.toml
+rename from JardinInteligente/gradle/libs.versions.toml
+rename to gradle/libs.versions.toml
+diff --git a/JardinInteligente/.gitignore b/.gitignore
+rename from JardinInteligente/.gitignore
+rename to .gitignore
+diff --git a/JardinInteligente/build.gradle.kts b/build.gradle.kts
+rename from JardinInteligente/build.gradle.kts
+rename to build.gradle.kts
+diff --git a/JardinInteligente/app/build.gradle.kts b/app/build.gradle.kts
+rename from JardinInteligente/app/build.gradle.kts
+rename to app/build.gradle.kts
+diff --git a/JardinInteligente/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+rename from JardinInteligente/app/src/main/AndroidManifest.xml
+rename to app/src/main/AndroidManifest.xml
+diff --git a/JardinInteligente/app/src/main/res/xml/data_extraction_rules.xml b/app/src/main/res/xml/data_extraction_rules.xml
+rename from JardinInteligente/app/src/main/res/xml/data_extraction_rules.xml
+rename to app/src/main/res/xml/data_extraction_rules.xml
+diff --git a/JardinInteligente/app/src/main/res/xml/backup_rules.xml b/app/src/main/res/xml/backup_rules.xml
+rename from JardinInteligente/app/src/main/res/xml/backup_rules.xml
+rename to app/src/main/res/xml/backup_rules.xml
+diff --git a/JardinInteligente/app/.gitignore b/app/.gitignore
+rename from JardinInteligente/app/.gitignore
+rename to app/.gitignore
+diff --git a/JardinInteligente/app/proguard-rules.pro b/app/proguard-rules.pro
+rename from JardinInteligente/app/proguard-rules.pro
+rename to app/proguard-rules.pro
+diff --git a/JardinInteligente/app/src/main/res/drawable/ic_launcher_background.xml b/app/src/main/res/drawable/ic_launcher_background.xml
+rename from JardinInteligente/app/src/main/res/drawable/ic_launcher_background.xml
+rename to app/src/main/res/drawable/ic_launcher_background.xml
+diff --git a/JardinInteligente/app/src/main/res/values/colors.xml b/app/src/main/res/values/colors.xml
+rename from JardinInteligente/app/src/main/res/values/colors.xml
+rename to app/src/main/res/values/colors.xml
+diff --git a/JardinInteligente/app/src/main/res/values/strings.xml b/app/src/main/res/values/strings.xml
+rename from JardinInteligente/app/src/main/res/values/strings.xml
+rename to app/src/main/res/values/strings.xml
+diff --git a/JardinInteligente/app/src/main/res/values/themes.xml b/app/src/main/res/values/themes.xml
+rename from JardinInteligente/app/src/main/res/values/themes.xml
+rename to app/src/main/res/values/themes.xml
+diff --git a/JardinInteligente/app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt b/app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt
+rename from JardinInteligente/app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt
+rename to app/src/test/java/com/azrael/jardininteligente/ExampleUnitTest.kt
+diff --git a/JardinInteligente/app/src/main/res/drawable/ic_launcher_foreground.xml b/app/src/main/res/drawable/ic_launcher_foreground.xml
+rename from JardinInteligente/app/src/main/res/drawable/ic_launcher_foreground.xml
+rename to app/src/main/res/drawable/ic_launcher_foreground.xml
+diff --git a/JardinInteligente/app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt b/app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt
+rename from JardinInteligente/app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt
+rename to app/src/androidTest/java/com/azrael/jardininteligente/ExampleInstrumentedTest.kt
+diff --git a/JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml b/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+rename from JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+rename to app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+diff --git a/JardinInteligente/app/src/main/java/com/azrael/jardininteligente/MainActivity.kt b/app/src/main/java/com/azrael/jardininteligente/MainActivity.kt
+rename from JardinInteligente/app/src/main/java/com/azrael/jardininteligente/MainActivity.kt
+rename to app/src/main/java/com/azrael/jardininteligente/MainActivity.kt
+diff --git a/JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml b/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+rename from JardinInteligente/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+rename to app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
