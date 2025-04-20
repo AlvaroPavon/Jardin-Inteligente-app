@@ -33,4 +33,12 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: NewForumTopicRequest
     ): Call<ApiResponse>
+
+    @GET("me")
+    fun getUserInfo(
+        @Header("Authorization") token: String
+    ): Call<UserResponse>
+
+    data class UserResponse(val correo: String)
+
 }

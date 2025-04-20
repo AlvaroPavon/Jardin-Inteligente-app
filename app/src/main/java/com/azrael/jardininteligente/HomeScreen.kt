@@ -1,15 +1,9 @@
-package com.azrael.jardininteligente.ui
+package com.azrael.jardininteligente
 
 import android.content.Context
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -17,46 +11,27 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.azrael.jardininteligente.ForumScreen
-import com.azrael.jardininteligente.PlantIdentificationScreen
 import com.azrael.jardininteligente.api.ApiClient
+import com.azrael.jardininteligente.api.ApiService.UserResponse
 import com.azrael.jardininteligente.api.models.Plant
+import com.azrael.jardininteligente.api.models.UserResponse
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-// Sealed class para definir los items del menú del drawer.
 sealed class DrawerMenuItem(val route: String, val title: String, val icon: ImageVector) {
     object Inicio : DrawerMenuItem("inicio", "Inicio", Icons.Filled.Home)
     object Identificar : DrawerMenuItem("identificar", "Identificar", Icons.Filled.CameraAlt)
@@ -66,16 +41,23 @@ sealed class DrawerMenuItem(val route: String, val title: String, val icon: Imag
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen() {
-    val navController = rememberNavController() // ✅ Aquí se crea correctamente
-    val context = LocalContext.current
+    val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        scrimColor = Color.Transparent,
         drawerContent = {
-            DrawerContent(navController = navController) {
-                coroutineScope.launch { drawerState.close() }
+            Surface(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(0.75f),
+                color = Color(0xFFF0F0F0)
+            ) {
+                DrawerContent(navController = navController) {
+                    coroutineScope.launch { drawerState.close() }
+                }
             }
         }
     ) {
@@ -85,7 +67,7 @@ fun HomeScreen() {
                     title = { Text("Jardín Inteligente") },
                     navigationIcon = {
                         Icon(
-                            imageVector = Icons.Default.Menu,
+                            imageVector = Icons.Filled.Menu,
                             contentDescription = "Menú",
                             modifier = Modifier
                                 .padding(16.dp)
@@ -97,18 +79,17 @@ fun HomeScreen() {
             content = { innerPadding ->
                 NavHost(
                     navController = navController,
-                    startDestination = "inicio",
+                    startDestination = DrawerMenuItem.Inicio.route,
                     modifier = Modifier.padding(innerPadding)
                 ) {
-                    composable("inicio") { MainScreenContent(navController) }
-                    composable("identificar") { PlantIdentificationScreen(navController) }
-                    composable("foro") { ForumScreen(navController) }
+                    composable(DrawerMenuItem.Inicio.route) { MainScreenContent(navController) }
+                    composable(DrawerMenuItem.Identificar.route) { PlantIdentificationScreen(navController) }
+                    composable(DrawerMenuItem.Foro.route) { ForumScreen(navController) }
                 }
             }
         )
     }
 }
-
 
 @Composable
 fun DrawerContent(navController: NavHostController, onItemSelected: () -> Unit) {
@@ -117,8 +98,44 @@ fun DrawerContent(navController: NavHostController, onItemSelected: () -> Unit) 
         DrawerMenuItem.Identificar,
         DrawerMenuItem.Foro
     )
-    Column(modifier = Modifier.fillMaxSize()) {
-        menuItems.forEach { item ->
+
+    val context = LocalContext.current
+    var correo by remember { mutableStateOf("") }
+
+    // Cargar el nombre del usuario desde la API
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("JardinInteligentePrefs", Context.MODE_PRIVATE)
+        val token = prefs.getString("token", null)
+        if (!token.isNullOrEmpty()) {
+            val authHeader = "Bearer $token"
+            ApiClient.apiService.getUserInfo(authHeader).enqueue(object : Callback<UserResponse> {
+                override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
+                    if (response.isSuccessful) {
+                        correo = response.body()?.correo ?: ""
+                    }
+                }
+
+                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                    // Puedes manejar el error si quieres
+                }
+            })
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.Start
+    ) {
+        Text(
+            text = if (correo.isNotEmpty()) "¡Bienvenido, $correo!" else "¡Bienvenido!",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
+        menuItems.forEachIndexed { index, item ->
             DrawerItem(item = item) {
                 navController.navigate(item.route) {
                     popUpTo(navController.graph.startDestinationId) { saveState = true }
@@ -126,6 +143,10 @@ fun DrawerContent(navController: NavHostController, onItemSelected: () -> Unit) 
                     restoreState = true
                 }
                 onItemSelected()
+            }
+
+            if (index != menuItems.lastIndex) {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -135,10 +156,12 @@ fun DrawerContent(navController: NavHostController, onItemSelected: () -> Unit) 
 fun DrawerItem(item: DrawerMenuItem, onClick: () -> Unit) {
     NavigationDrawerItem(
         icon = { Icon(item.icon, contentDescription = item.title) },
-        label = { Text(item.title) },
+        label = { Text(text = item.title, style = MaterialTheme.typography.titleMedium) },
         selected = false,
         onClick = onClick,
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(NavigationDrawerItemDefaults.ItemPadding)
     )
 }
 
@@ -166,6 +189,7 @@ fun MainScreenContent(navController: NavHostController) {
                         Toast.makeText(context, "Error al cargar plantas", Toast.LENGTH_SHORT).show()
                     }
                 }
+
                 override fun onFailure(call: Call<List<Plant>>, t: Throwable) {
                     loading = false
                     Toast.makeText(context, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
@@ -176,20 +200,16 @@ fun MainScreenContent(navController: NavHostController) {
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
-            loading -> {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-            plantList.isEmpty() -> {
-                Text(
-                    text = "No hay plantas registradas",
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
+            loading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            plantList.isEmpty() -> Text(
+                text = "No hay plantas registradas",
+                modifier = Modifier.align(Alignment.Center),
+                style = MaterialTheme.typography.bodyMedium
+            )
             else -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp)
+                    contentPadding = PaddingValues(16.dp)
                 ) {
                     items(plantList) { plant ->
                         PlantItem(plant = plant)
@@ -209,7 +229,7 @@ fun PlantItem(plant: Plant) {
             .padding(8.dp)
     ) {
         Text(text = plant.nombre, style = MaterialTheme.typography.titleMedium)
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Text(text = plant.descripcion, style = MaterialTheme.typography.bodyMedium)
     }
 }

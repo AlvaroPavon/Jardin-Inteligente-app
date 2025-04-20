@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.azrael.jardininteligente.HomeScreen
 import com.azrael.jardininteligente.LoginScreen
 import com.azrael.jardininteligente.RegisterScreen
 
